@@ -1,8 +1,16 @@
-Package ``go-libp2p-webrtc-direct`` is a Golang version of the webrtc-direct libp2p transport.
+go-libp2p-webrtc-direct
+===
+Package ``go-libp2p-webrtc-direct`` aims to be a Go port of [js-libp2p-webrtc-direct](https://github.com/libp2p/js-libp2p-webrtc-direct).
 
-Please refer to ``pions/webrtc`` for additional installation instructions.
-The package also requires the following forks to be checked out under their original package name:
-- ``backkem/go-multiaddr``
-- ``backkem/mafmt``
+## Dependencies
+There is currently no dependency management technique implemented.
+However, this package relies on some dependencies that have not been
+upstreamed yet. Check out the following forks under their original package name:
+- [backkem/go-multiaddr-dns](https://github.com/backkem/go-multiaddr-dns) under `multiformats/go-multiaddr`
+- [backkem/mafmt](https://github.com/backkem/mafmt) under `whyrusleeping/mafmt`
 
-The transport passes the ``SubtestStress1Conn1Stream1Msg`` test case but there is a long list of known limitations. Therefore, please don't rely on this package. It only serves as a proof of concept and as an experiment to gather some experience building tools on top of ``pions/webrtc``.
+## Status
+The package is in alpha status.
+
+## License
+MIT License - see [LICENSE](LICENSE) for full text
