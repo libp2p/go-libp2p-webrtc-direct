@@ -9,7 +9,7 @@ flags.defineBoolean(listenFlag, false, 'Listen for incoming connections.')
 flags.parse()
 const listening = flags.get(listenFlag)
 
-const mh = multiaddr('/ip4/127.0.0.1/tcp/9090/http/p2p-webrtc-direct')
+const maddr = multiaddr('/ip4/127.0.0.1/tcp/9090/http/p2p-webrtc-direct')
 
 const direct = new WebRTCDirect()
 
@@ -31,11 +31,11 @@ if (listening) {
     })
   })
 
-  listener.listen(mh, () => {
+  listener.listen(maddr, () => {
     console.log('[listener] Listening')
   })
 } else {
-  direct.dial(mh, { config: {} }, (err, conn) => {
+  direct.dial(maddr, { config: {} }, (err, conn) => {
     if (err) {
       console.log(`[dialer] Failed to open connection: ${err}`)
     }
