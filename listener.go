@@ -90,7 +90,7 @@ func (l *Listener) handleSignal(offerStr string) (string, error) {
 	}
 
 	api := l.config.transport.api
-	pc, err := api.NewRTCPeerConnection(l.config.transport.webrtcOptions)
+	pc, err := api.NewPeerConnection(l.config.transport.webrtcOptions)
 	if err != nil {
 		return "", err
 	}
@@ -102,6 +102,11 @@ func (l *Listener) handleSignal(offerStr string) (string, error) {
 	answer, err := pc.CreateAnswer(nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create answer: %v", err)
+	}
+
+	err = pc.SetLocalDescription(answer)
+	if err != nil {
+		return "", fmt.Errorf("failed to set local description: %v", err)
 	}
 
 	answerEnc, err := encodeSignal(answer)

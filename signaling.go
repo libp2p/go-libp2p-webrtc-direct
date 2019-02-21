@@ -8,7 +8,7 @@ import (
 	"github.com/pions/webrtc"
 )
 
-func encodeSignal(desc webrtc.RTCSessionDescription) (string, error) {
+func encodeSignal(desc webrtc.SessionDescription) (string, error) {
 	descData, err := json.Marshal(desc)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal description: %v", err)
@@ -21,8 +21,8 @@ func encodeSignal(desc webrtc.RTCSessionDescription) (string, error) {
 	return descEnc, nil
 }
 
-func decodeSignal(descEnc string) (webrtc.RTCSessionDescription, error) {
-	var desc webrtc.RTCSessionDescription
+func decodeSignal(descEnc string) (webrtc.SessionDescription, error) {
+	var desc webrtc.SessionDescription
 
 	_, descData, err := multibase.Decode(descEnc)
 	if err != nil {

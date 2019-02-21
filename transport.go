@@ -14,7 +14,7 @@ import (
 
 // Transport is the WebRTC transport.
 type Transport struct {
-	webrtcOptions webrtc.RTCConfiguration
+	webrtcOptions webrtc.Configuration
 	muxer         smux.Transport
 	localID       peer.ID
 	api           *webrtc.API
@@ -22,7 +22,7 @@ type Transport struct {
 
 // NewTransport creates a WebRTC transport that signals over a direct HTTP connection.
 // It is currently required to provide a muxer.
-func NewTransport(webrtcOptions webrtc.RTCConfiguration, muxer smux.Transport) *Transport {
+func NewTransport(webrtcOptions webrtc.Configuration, muxer smux.Transport) *Transport {
 	s := webrtc.SettingEngine{}
 	// Use Detach data channels mode
 	s.DetachDataChannels()

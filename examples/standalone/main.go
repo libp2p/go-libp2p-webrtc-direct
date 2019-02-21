@@ -24,7 +24,7 @@ func main() {
 	check(err)
 
 	transport := direct.NewTransport(
-		webrtc.RTCConfiguration{},
+		webrtc.Configuration{},
 		new(mplex.Transport),
 	)
 

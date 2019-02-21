@@ -50,7 +50,7 @@ func newConnConfig(transport *Transport, maAddr ma.Multiaddr, isServer bool) (*c
 type Conn struct {
 	config *connConfig
 
-	peerConnection *webrtc.RTCPeerConnection
+	peerConnection *webrtc.PeerConnection
 	initChannel    *datachannel.DataChannel
 
 	lock      sync.RWMutex
@@ -59,7 +59,7 @@ type Conn struct {
 	muxedConn smux.Conn
 }
 
-func newConn(config *connConfig, pc *webrtc.RTCPeerConnection, initChannel *datachannel.DataChannel) *Conn {
+func newConn(config *connConfig, pc *webrtc.PeerConnection, initChannel *datachannel.DataChannel) *Conn {
 	conn := &Conn{
 		config:         config,
 		peerConnection: pc,
@@ -68,7 +68,7 @@ func newConn(config *connConfig, pc *webrtc.RTCPeerConnection, initChannel *data
 		isMuxed:        config.transport.muxer != nil,
 	}
 
-	pc.OnDataChannel(func(dc *webrtc.RTCDataChannel) {
+	pc.OnDataChannel(func(dc *webrtc.DataChannel) {
 		// We have to detach in OnDataChannel
 		detachRes := detachChannel(dc)
 		conn.accept <- detachRes
@@ -79,7 +79,7 @@ func newConn(config *connConfig, pc *webrtc.RTCPeerConnection, initChannel *data
 
 func dial(ctx context.Context, config *connConfig) (*Conn, error) {
 	api := config.transport.api
-	pc, err := api.NewRTCPeerConnection(config.transport.webrtcOptions)
+	pc, err := api.NewPeerConnection(config.transport.webrtcOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +92,11 @@ func dial(ctx context.Context, config *connConfig) (*Conn, error) {
 	detachRes := detachChannel(dc)
 
 	offer, err := pc.CreateOffer(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	err = pc.SetLocalDescription(offer)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +151,7 @@ type detachResult struct {
 	err error
 }
 
-func detachChannel(dc *webrtc.RTCDataChannel) chan detachResult {
+func detachChannel(dc *webrtc.DataChannel) chan detachResult {
 	onOpenRes := make(chan detachResult)
 	dc.OnOpen(func() {
 		// Detach the data channel
@@ -214,7 +219,7 @@ func (c *Conn) OpenStream() (smux.Stream, error) {
 	return newStream(rawDC), nil
 }
 
-func (c *Conn) getPC() (*webrtc.RTCPeerConnection, error) {
+func (c *Conn) getPC() (*webrtc.PeerConnection, error) {
 	c.lock.RLock()
 	pc := c.peerConnection
 	c.lock.RUnlock()
