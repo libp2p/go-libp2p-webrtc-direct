@@ -16,6 +16,7 @@ import (
 type Transport struct {
 	webrtcOptions webrtc.RTCConfiguration
 	muxer         smux.Transport
+	localID       peer.ID
 	api           *webrtc.API
 }
 
@@ -25,10 +26,12 @@ func NewTransport(webrtcOptions webrtc.RTCConfiguration, muxer smux.Transport) *
 	s := webrtc.SettingEngine{}
 	// Use Detach data channels mode
 	s.DetachDataChannels()
+
 	api := webrtc.NewAPI(webrtc.WithSettingEngine(s))
 	return &Transport{
 		webrtcOptions: webrtcOptions,
 		muxer:         muxer, // TODO: Make the muxer optional
+		localID:       peer.ID(1),
 		api:           api,
 	}
 }
@@ -49,6 +52,8 @@ func (t *Transport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (tp
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dial args: %v", err)
 	}
+
+	cfg.remoteID = p
 
 	conn, err := dial(ctx, cfg)
 	if err != nil {
