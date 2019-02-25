@@ -26,6 +26,7 @@ type connConfig struct {
 	maAddr    ma.Multiaddr
 	addr      net.Addr
 	isServer  bool
+	remoteID  peer.ID
 }
 
 func newConnConfig(transport *Transport, maAddr ma.Multiaddr, isServer bool) (*connConfig, error) {
@@ -310,26 +311,26 @@ func (c *Conn) awaitAccept() (*datachannel.DataChannel, error) {
 
 // LocalPeer returns our peer ID
 func (c *Conn) LocalPeer() peer.ID {
-	// TODO: How to form a peer ID?
-	return peer.ID("")
+	// TODO: Base on WebRTC security?
+	return c.config.transport.localID
 }
 
 // LocalPrivateKey returns our private key
 func (c *Conn) LocalPrivateKey() ic.PrivKey {
-	// TODO: Expose from pions/webrtc?
+	// TODO: Base on WebRTC security?
 	return nil
 
 }
 
 // RemotePeer returns the peer ID of the remote peer.
 func (c *Conn) RemotePeer() peer.ID {
-	// TODO: How to form a peer ID?
-	return peer.ID("")
+	// TODO: Base on WebRTC security?
+	return c.config.remoteID
 }
 
 // RemotePublicKey returns the public key of the remote peer.
 func (c *Conn) RemotePublicKey() ic.PubKey {
-	// TODO: Expose from pions/webrtc?
+	// TODO: Base on WebRTC security?
 	return nil
 }
 
