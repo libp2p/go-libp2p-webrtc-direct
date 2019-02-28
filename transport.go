@@ -8,8 +8,8 @@ import (
 	tpt "github.com/libp2p/go-libp2p-transport"
 	smux "github.com/libp2p/go-stream-muxer"
 	ma "github.com/multiformats/go-multiaddr"
+	mafmt "github.com/multiformats/go-multiaddr-fmt"
 	"github.com/pions/webrtc"
-	mafmt "github.com/whyrusleeping/mafmt"
 )
 
 // Transport is the WebRTC transport.
