@@ -76,6 +76,8 @@ func (l *Listener) handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	_, err = fmt.Fprint(w, answer)
 	if err != nil {
 		log.Warningf("failed to handle request: failed to send answer: %v", err)
