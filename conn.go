@@ -51,7 +51,7 @@ type Conn struct {
 	config *connConfig
 
 	peerConnection *webrtc.PeerConnection
-	initChannel    *datachannel.DataChannel
+	initChannel    datachannel.ReadWriteCloser
 
 	lock      sync.RWMutex
 	accept    chan chan detachResult
@@ -59,7 +59,7 @@ type Conn struct {
 	muxedConn smux.Conn
 }
 
-func newConn(config *connConfig, pc *webrtc.PeerConnection, initChannel *datachannel.DataChannel) *Conn {
+func newConn(config *connConfig, pc *webrtc.PeerConnection, initChannel datachannel.ReadWriteCloser) *Conn {
 	conn := &Conn{
 		config:         config,
 		peerConnection: pc,
@@ -147,7 +147,7 @@ func dial(ctx context.Context, config *connConfig) (*Conn, error) {
 }
 
 type detachResult struct {
-	dc  *datachannel.DataChannel
+	dc  datachannel.ReadWriteCloser
 	err error
 }
 
@@ -271,7 +271,7 @@ func (c *Conn) useMuxer(conn net.Conn, muxer smux.Transport) error {
 	return nil
 }
 
-func (c *Conn) checkInitChannel() *datachannel.DataChannel {
+func (c *Conn) checkInitChannel() datachannel.ReadWriteCloser {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	// Since a WebRTC offer can't be empty the offering side will have
@@ -304,7 +304,7 @@ func (c *Conn) AcceptStream() (smux.Stream, error) {
 	return newStream(rawDC), nil
 }
 
-func (c *Conn) awaitAccept() (*datachannel.DataChannel, error) {
+func (c *Conn) awaitAccept() (datachannel.ReadWriteCloser, error) {
 	detachRes, ok := <-c.accept
 	if !ok {
 		return nil, errors.New("Conn closed")
@@ -356,9 +356,9 @@ func (c *Conn) Transport() tpt.Transport {
 	return c.config.transport
 }
 
-// dcWrapper wraps datachannel.DataChannel to form a net.Conn
+// dcWrapper wraps datachannel.ReadWriteCloser to form a net.Conn
 type dcWrapper struct {
-	channel *datachannel.DataChannel
+	channel datachannel.ReadWriteCloser
 	addr    net.Addr
 }
 

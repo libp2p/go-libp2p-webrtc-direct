@@ -9,10 +9,10 @@ import (
 
 // Stream is a bidirectional io pipe within a connection.
 type Stream struct {
-	channel *datachannel.DataChannel
+	channel datachannel.ReadWriteCloser
 }
 
-func newStream(channel *datachannel.DataChannel) *Stream {
+func newStream(channel datachannel.ReadWriteCloser) *Stream {
 	return &Stream{channel: channel}
 }
 
