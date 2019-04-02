@@ -20,13 +20,13 @@ require (
 	github.com/multiformats/go-multibase v0.0.1
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
-	github.com/pions/datachannel v1.2.1
+	github.com/pions/datachannel v1.2.2-0.20190402055840-9276b506f1f3
 	github.com/pions/quic-go v0.10.2 // indirect
-	github.com/pions/webrtc v1.2.1-0.20190401190041-d906c2b43b07
+	github.com/pions/webrtc v1.2.1-0.20190402062217-69e5725007d2
 	github.com/whyrusleeping/go-logging v0.0.0-20170515211332-0457bb6b88fc
 	github.com/whyrusleeping/go-smux-multiplex v3.0.16+incompatible
 	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c // indirect
 	golang.org/x/net v0.0.0-20190328230028-74de082e2cca // indirect
-	golang.org/x/sys v0.0.0-20190329044733-9eb1bfa1ce65 // indirect
+	golang.org/x/sys v0.0.0-20190402054613-e4093980e83e // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
