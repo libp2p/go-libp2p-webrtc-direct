@@ -27,21 +27,32 @@ type connConfig struct {
 	addr      net.Addr
 	isServer  bool
 	remoteID  peer.ID
+	localID   peer.ID
+}
+
+func getNetAddr(addr ma.Multiaddr) (net.Addr, error) {
+	if !Fmt.Matches(addr) {
+		return nil, fmt.Errorf("misformatted multiaddress: %q (expected %q)", addr.String(), Fmt.String())
+	}
+	httpMa, _ := ma.SplitLast(addr)
+	tcpMa := httpMa.Decapsulate(httpma)
+	netAddr, err := manet.ToNetAddr(tcpMa)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get net addr: %v", err)
+	}
+	return netAddr, nil
 }
 
 func newConnConfig(transport *Transport, maAddr ma.Multiaddr, isServer bool) (*connConfig, error) {
-	httpMa := maAddr.Decapsulate(webrtcma)
-
-	tcpMa := httpMa.Decapsulate(httpma)
-	addr, err := manet.ToNetAddr(tcpMa)
+	netAddr, err := getNetAddr(maAddr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get net addr: %v", err)
+		return nil, err
 	}
 
 	return &connConfig{
 		transport: transport,
 		maAddr:    maAddr,
-		addr:      addr,
+		addr:      netAddr,
 		isServer:  isServer,
 	}, nil
 }
