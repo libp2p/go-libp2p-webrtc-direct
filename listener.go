@@ -9,7 +9,6 @@ import (
 
 	tpt "github.com/libp2p/go-libp2p-transport"
 	ma "github.com/multiformats/go-multiaddr"
-	manet "github.com/multiformats/go-multiaddr-net"
 )
 
 // Listener is an interface closely resembling the net.Listener interface.
@@ -28,14 +27,10 @@ func newListener(config *connConfig) (*Listener, error) {
 	}
 
 	// Update the addr after listening
-	tcpMa, err := manet.FromNetAddr(ln.Addr())
+	maAddr, err := newMultiaddrFromNetAddr(ln.Addr(), config.localID)
 	if err != nil {
-		return nil, fmt.Errorf("failed create ma: %v", err)
+		return nil, err
 	}
-
-	httpMa := tcpMa.Encapsulate(httpma)
-	maAddr := httpMa.Encapsulate(webrtcma)
-
 	config.addr = ln.Addr()
 	config.maAddr = maAddr
 

@@ -14,6 +14,7 @@ require (
 	github.com/libp2p/go-libp2p-peerstore v0.0.1
 	github.com/libp2p/go-libp2p-transport v0.0.4
 	github.com/libp2p/go-stream-muxer v0.0.1
+	github.com/libp2p/go-ws-transport v0.0.1
 	github.com/multiformats/go-multiaddr v0.0.2
 	github.com/multiformats/go-multiaddr-fmt v0.0.1
 	github.com/multiformats/go-multiaddr-net v0.0.1
@@ -23,6 +24,7 @@ require (
 	github.com/pions/datachannel v1.2.2-0.20190402055840-9276b506f1f3
 	github.com/pions/quic-go v0.10.2 // indirect
 	github.com/pions/webrtc v1.2.1-0.20190402062217-69e5725007d2
+	github.com/stretchr/testify v1.3.0
 	github.com/whyrusleeping/go-logging v0.0.0-20170515211332-0457bb6b88fc
 	github.com/whyrusleeping/go-smux-multiplex v3.0.16+incompatible
 	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c // indirect

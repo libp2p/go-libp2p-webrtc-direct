@@ -6,11 +6,18 @@ import (
 
 	peer "github.com/libp2p/go-libp2p-peer"
 	tpt "github.com/libp2p/go-libp2p-transport"
+	transport "github.com/libp2p/go-libp2p-transport"
 	smux "github.com/libp2p/go-stream-muxer"
 	ma "github.com/multiformats/go-multiaddr"
 	mafmt "github.com/multiformats/go-multiaddr-fmt"
 	"github.com/pions/webrtc"
 )
+
+// Ensure that our Transport implements the correct interface.
+var _ transport.Transport = &Transport{}
+
+// Fmt is the Multiaddress format for WebRTC
+var Fmt = mafmt.And(mafmt.HTTP, mafmt.Base(Protocol.Code))
 
 // Transport is the WebRTC transport.
 type Transport struct {
@@ -39,7 +46,7 @@ func NewTransport(webrtcOptions webrtc.Configuration, muxer smux.Transport) *Tra
 // CanDial returns true if this transport believes it can dial the given
 // multiaddr.
 func (t *Transport) CanDial(addr ma.Multiaddr) bool {
-	return mafmt.WebRTCDirect.Matches(addr)
+	return Fmt.Matches(addr)
 }
 
 // Dial dials the peer at the remote address.
@@ -48,11 +55,12 @@ func (t *Transport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (tp
 		return nil, fmt.Errorf("can't dial address %s", raddr)
 	}
 
+	// TODO: Check that the peer id in raddr is equal to p.
+
 	cfg, err := newConnConfig(t, raddr, false)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dial args: %v", err)
 	}
-
 	cfg.remoteID = p
 
 	conn, err := dial(ctx, cfg)
@@ -73,6 +81,11 @@ func (t *Transport) Listen(laddr ma.Multiaddr) (tpt.Listener, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dial args: %v", err)
 	}
+	localID, err := getPeerIDFromMultiAddr(laddr)
+	if err != nil {
+		return nil, err
+	}
+	cfg.localID = localID
 
 	l, err := newListener(cfg)
 	if err != nil {
@@ -84,14 +97,14 @@ func (t *Transport) Listen(laddr ma.Multiaddr) (tpt.Listener, error) {
 
 // Protocols returns the list of terminal protocols this transport can dial.
 func (t *Transport) Protocols() []int {
-	return []int{ma.P_P2P_WEBRTC_DIRECT}
+	return []int{protoCode}
 }
 
-// Proxy always returns false for the TCP transport.
+// Proxy always returns false for the WebRTC transport.
 func (t *Transport) Proxy() bool {
 	return false
 }
 
 func (t *Transport) String() string {
-	return "p2p-webrtc-direct"
+	return "p2p-webrtc"
 }

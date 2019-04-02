@@ -9,7 +9,6 @@ import (
 
 var log = logging.Logger("webrtcdirect-tpt")
 
-var webrtcma, _ = ma.NewMultiaddr("/p2p-webrtc-direct")
 var httpma, _ = ma.NewMultiaddr("/http")
 
 var _ tpt.Transport = &Transport{}
