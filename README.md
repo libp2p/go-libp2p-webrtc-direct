@@ -15,7 +15,7 @@ Status](https://travis-ci.org/libp2p/go-libp2p-webrtc-direct.svg?branch=master)]
 
 ⚠️ Status: Alpha. ⚠️ 
 
-Lead maintainer: [@backkhem](https://github.com/backkem)
+Lead maintainer: [@backkem](https://github.com/backkem)
 
 Special thanks to [@pions](https://github.com/pions) for their fantastic
 [WebRTC Go library](https://github.com/pions/webrtc), which made this
