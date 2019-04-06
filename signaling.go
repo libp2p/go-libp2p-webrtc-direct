@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	multibase "github.com/multiformats/go-multibase"
-	"github.com/pions/webrtc"
+	"github.com/pion/webrtc/v2"
 )
 
 func encodeSignal(desc webrtc.SessionDescription) (string, error) {

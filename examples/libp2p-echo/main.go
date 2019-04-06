@@ -22,7 +22,7 @@ import (
 	gologging "github.com/whyrusleeping/go-logging"
 
 	direct "github.com/libp2p/go-libp2p-webrtc-direct"
-	"github.com/pions/webrtc"
+	"github.com/pion/webrtc/v2"
 	mplex "github.com/whyrusleeping/go-smux-multiplex"
 )
 
