@@ -7,7 +7,7 @@ import (
 
 	utils "github.com/libp2p/go-libp2p-transport/test"
 	ma "github.com/multiformats/go-multiaddr"
-	"github.com/pions/webrtc"
+	"github.com/pion/webrtc/v2"
 	mplex "github.com/whyrusleeping/go-smux-multiplex"
 )
 

@@ -9,7 +9,7 @@ import (
 	direct "github.com/libp2p/go-libp2p-webrtc-direct"
 	smux "github.com/libp2p/go-stream-muxer"
 	ma "github.com/multiformats/go-multiaddr"
-	"github.com/pions/webrtc"
+	"github.com/pion/webrtc/v2"
 	mplex "github.com/whyrusleeping/go-smux-multiplex"
 )
 

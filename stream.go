@@ -4,7 +4,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/pions/datachannel"
+	"github.com/pion/datachannel"
 )
 
 // Stream is a bidirectional io pipe within a connection.

@@ -17,8 +17,8 @@ Status](https://travis-ci.org/libp2p/go-libp2p-webrtc-direct.svg?branch=master)]
 
 Lead maintainer: [@backkem](https://github.com/backkem)
 
-Special thanks to [@pions](https://github.com/pions) for their fantastic
-[WebRTC Go library](https://github.com/pions/webrtc), which made this
+Special thanks to [@pion](https://github.com/pion) for their fantastic
+[WebRTC Go library](https://github.com/pion/webrtc), which made this
 libp2p transport possible.
 
 ## Install
