@@ -13,12 +13,12 @@ Status](https://travis-ci.org/libp2p/go-libp2p-webrtc-direct.svg?branch=master)]
 > Go counterpart to
 > [js-libp2p-webrtc-direct](https://github.com/libp2p/js-libp2p-webrtc-direct).
 
-⚠️ Status: Alpha. ⚠️ 
+⚠️ Status: Alpha. ⚠️
 
 Lead maintainer: [@backkem](https://github.com/backkem)
 
-Special thanks to [@pions](https://github.com/pions) for their fantastic
-[WebRTC Go library](https://github.com/pions/webrtc), which made this
+Special thanks to [@pion](https://github.com/pion) for their fantastic
+[WebRTC Go library](https://github.com/pion/webrtc), which made this
 libp2p transport possible.
 
 ## Install
@@ -48,4 +48,5 @@ This repository falls under the IPFS [Code of
 Conduct](https://github.com/ipfs/community/blob/master/code-of-conduct.md).
 
 ## License
+
 MIT

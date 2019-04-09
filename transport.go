@@ -9,7 +9,7 @@ import (
 	smux "github.com/libp2p/go-stream-muxer"
 	ma "github.com/multiformats/go-multiaddr"
 	mafmt "github.com/multiformats/go-multiaddr-fmt"
-	"github.com/pions/webrtc"
+	webrtc "github.com/pion/webrtc/v2"
 )
 
 // Transport is the WebRTC transport.

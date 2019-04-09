@@ -17,8 +17,8 @@ import (
 	smux "github.com/libp2p/go-stream-muxer"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
-	"github.com/pions/datachannel"
-	"github.com/pions/webrtc"
+	"github.com/pion/datachannel"
+	webrtc "github.com/pion/webrtc/v2"
 )
 
 type connConfig struct {
