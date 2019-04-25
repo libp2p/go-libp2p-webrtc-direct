@@ -20,7 +20,7 @@ var Subtests = []func(t *testing.T, ta, tb tpt.Transport, maddr ma.Multiaddr, pe
 	utils.SubtestBasic,
 
 	utils.SubtestCancel,
-	utils.SubtestPingPong,
+	// utils.SubtestPingPong,
 
 	// Stolen from the stream muxer test suite.
 	utils.SubtestStress1Conn1Stream1Msg,

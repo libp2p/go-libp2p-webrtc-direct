@@ -14,6 +14,6 @@ require (
 	github.com/multiformats/go-multiaddr-net v0.0.1
 	github.com/multiformats/go-multibase v0.0.1
 	github.com/pion/datachannel v1.4.0
-	github.com/pion/webrtc/v2 v2.0.9-0.20190425122703-f7867d2ac10d
+	github.com/pion/webrtc/v2 v2.0.9-0.20190425134100-4cf743fc097d
 	github.com/whyrusleeping/go-smux-multiplex v3.0.16+incompatible
 )
