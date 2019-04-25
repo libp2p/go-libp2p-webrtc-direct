@@ -9,6 +9,7 @@ go:
 env:
   global:
     - GOTFLAGS="-race"
+    - PIONS_LOG_DEBUG=all
   matrix:
     - BUILD_DEPTYPE=gomod
 
