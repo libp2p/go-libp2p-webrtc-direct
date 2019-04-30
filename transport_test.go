@@ -25,12 +25,12 @@ var Subtests = []func(t *testing.T, ta, tb tpt.Transport, maddr ma.Multiaddr, pe
 	// Stolen from the stream muxer test suite.
 	utils.SubtestStress1Conn1Stream1Msg,
 	utils.SubtestStress1Conn1Stream100Msg,
-	// utils.SubtestStress1Conn100Stream100Msg,
-	// utils.SubtestStress50Conn10Stream50Msg,
-	// utils.SubtestStress1Conn1000Stream10Msg,
-	// utils.SubtestStress1Conn100Stream100Msg10MB,
-	// utils.SubtestStreamOpenStress,
-	// utils.SubtestStreamReset,
+	utils.SubtestStress1Conn100Stream100Msg,
+	utils.SubtestStress50Conn10Stream50Msg,
+	utils.SubtestStress1Conn1000Stream10Msg,
+	utils.SubtestStress1Conn100Stream100Msg10MB,
+	utils.SubtestStreamOpenStress,
+	utils.SubtestStreamReset,
 }
 
 func getFunctionName(i interface{}) string {
