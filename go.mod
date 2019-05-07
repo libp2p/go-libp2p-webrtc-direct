@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/ipfs/go-log v0.0.1
+	github.com/jbenet/go-detect-race v0.0.0-20150302022421-3463798d9574
 	github.com/libp2p/go-libp2p-crypto v0.0.1
 	github.com/libp2p/go-libp2p-peer v0.1.0
 	github.com/libp2p/go-libp2p-transport v0.0.5-0.20190506231221-045097a6a962
