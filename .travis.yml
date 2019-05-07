@@ -7,8 +7,6 @@ go:
   - 1.12.x
 
 env:
-  global:
-    # - GOTFLAGS="-race"
   matrix:
     - BUILD_DEPTYPE=gomod
 
@@ -16,8 +14,10 @@ env:
 install:
   - true
 
+# run tests with and without race detection
 script:
   - bash <(curl -s https://raw.githubusercontent.com/ipfs/ci-helpers/master/travis-ci/run-standard-tests.sh)
+  - GOTFLAGS="-race" bash <(curl -s https://raw.githubusercontent.com/ipfs/ci-helpers/master/travis-ci/run-standard-tests.sh)
 
 cache:
   directories:
