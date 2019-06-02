@@ -11,10 +11,10 @@ import (
 	"sync"
 	"time"
 
-	ic "github.com/libp2p/go-libp2p-crypto"
-	peer "github.com/libp2p/go-libp2p-peer"
-	tpt "github.com/libp2p/go-libp2p-transport"
-	smux "github.com/libp2p/go-stream-muxer"
+	ic "github.com/libp2p/go-libp2p-core/crypto"
+	smux "github.com/libp2p/go-libp2p-core/mux"
+	peer "github.com/libp2p/go-libp2p-core/peer"
+	tpt "github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
 	"github.com/pion/datachannel"
@@ -56,7 +56,7 @@ type Conn struct {
 	lock      sync.RWMutex
 	accept    chan chan detachResult
 	isMuxed   bool
-	muxedConn smux.Conn
+	muxedConn smux.MuxedConn
 }
 
 func newConn(config *connConfig, pc *webrtc.PeerConnection, initChannel datachannel.ReadWriteCloser) *Conn {
@@ -187,7 +187,7 @@ func (c *Conn) IsClosed() bool {
 }
 
 // OpenStream creates a new stream.
-func (c *Conn) OpenStream() (smux.Stream, error) {
+func (c *Conn) OpenStream() (smux.MuxedStream, error) {
 	muxed, err := c.getMuxed()
 	if err != nil {
 		return nil, err
@@ -231,7 +231,7 @@ func (c *Conn) getPC() (*webrtc.PeerConnection, error) {
 	return pc, nil
 }
 
-func (c *Conn) getMuxed() (smux.Conn, error) {
+func (c *Conn) getMuxed() (smux.MuxedConn, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -261,7 +261,7 @@ func (c *Conn) getMuxed() (smux.Conn, error) {
 }
 
 // Note: caller should hold the conn lock.
-func (c *Conn) useMuxer(conn net.Conn, muxer smux.Transport) error {
+func (c *Conn) useMuxer(conn net.Conn, muxer smux.Multiplexer) error {
 	muxed, err := muxer.NewConn(conn, c.config.isServer)
 	if err != nil {
 		return err
@@ -287,7 +287,7 @@ func (c *Conn) checkInitChannel() datachannel.ReadWriteCloser {
 }
 
 // AcceptStream accepts a stream opened by the other side.
-func (c *Conn) AcceptStream() (smux.Stream, error) {
+func (c *Conn) AcceptStream() (smux.MuxedStream, error) {
 	muxed, err := c.getMuxed()
 	if err != nil {
 		return nil, err

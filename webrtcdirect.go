@@ -2,8 +2,8 @@ package libp2pwebrtcdirect
 
 import (
 	logging "github.com/ipfs/go-log"
-	tpt "github.com/libp2p/go-libp2p-transport"
-	smux "github.com/libp2p/go-stream-muxer"
+	smux "github.com/libp2p/go-libp2p-core/mux"
+	tpt "github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
@@ -13,7 +13,7 @@ var webrtcma, _ = ma.NewMultiaddr("/p2p-webrtc-direct")
 var httpma, _ = ma.NewMultiaddr("/http")
 
 var _ tpt.Transport = &Transport{}
-var _ tpt.Conn = &Conn{}
+var _ tpt.CapableConn = &Conn{}
 var _ tpt.Listener = &Listener{}
 
-var _ smux.Stream = &Stream{}
+var _ smux.MuxedStream = &Stream{}
