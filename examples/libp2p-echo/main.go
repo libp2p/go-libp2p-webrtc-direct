@@ -14,16 +14,16 @@ import (
 	golog "github.com/ipfs/go-log"
 	libp2p "github.com/libp2p/go-libp2p"
 	crypto "github.com/libp2p/go-libp2p-core/crypto"
-	host "github.com/libp2p/go-libp2p-host"
-	net "github.com/libp2p/go-libp2p-net"
+	host "github.com/libp2p/go-libp2p-core/host"
+	net "github.com/libp2p/go-libp2p-core/network"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	pstore "github.com/libp2p/go-libp2p-core/peerstore"
 	ma "github.com/multiformats/go-multiaddr"
 	gologging "github.com/whyrusleeping/go-logging"
 
+	mplex "github.com/libp2p/go-libp2p-mplex"
 	direct "github.com/libp2p/go-libp2p-webrtc-direct"
 	"github.com/pion/webrtc/v2"
-	mplex "github.com/whyrusleeping/go-smux-multiplex"
 )
 
 // makeBasicHost creates a LibP2P host with a random peer ID listening on the
