@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	tpt "github.com/libp2p/go-libp2p-core/transport"
-	direct "github.com/libp2p/go-libp2p-webrtc-direct"
 	smux "github.com/libp2p/go-libp2p-core/mux"
+	tpt "github.com/libp2p/go-libp2p-core/transport"
+	mplex "github.com/libp2p/go-libp2p-mplex"
+	direct "github.com/libp2p/go-libp2p-webrtc-direct"
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/pion/webrtc/v2"
-	mplex "github.com/whyrusleeping/go-smux-multiplex"
 )
 
 func main() {
@@ -41,7 +41,7 @@ func main() {
 	check(err)
 }
 
-func handleConn(c tpt.Conn) {
+func handleConn(c tpt.CapableConn) {
 	for {
 		s, err := c.AcceptStream()
 		if err != nil {
@@ -52,7 +52,7 @@ func handleConn(c tpt.Conn) {
 		go handleStream(s)
 	}
 }
-func handleStream(s smux.Stream) {
+func handleStream(s smux.MuxedStream) {
 	b, err := ioutil.ReadAll(s)
 	check(err)
 	fmt.Println("[listener] Received:")
