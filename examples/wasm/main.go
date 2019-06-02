@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	tpt "github.com/libp2p/go-libp2p-transport"
+	tpt "github.com/libp2p/go-libp2p-core/transport"
 	direct "github.com/libp2p/go-libp2p-webrtc-direct"
-	smux "github.com/libp2p/go-stream-muxer"
+	smux "github.com/libp2p/go-libp2p-core/mux"
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/pion/webrtc/v2"
 	mplex "github.com/whyrusleeping/go-smux-multiplex"

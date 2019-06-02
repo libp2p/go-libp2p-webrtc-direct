@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	peer "github.com/libp2p/go-libp2p-peer"
-	tpt "github.com/libp2p/go-libp2p-transport"
-	smux "github.com/libp2p/go-stream-muxer"
+	smux "github.com/libp2p/go-libp2p-core/mux"
+	peer "github.com/libp2p/go-libp2p-core/peer"
+	tpt "github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
 	mafmt "github.com/multiformats/go-multiaddr-fmt"
 	"github.com/pion/webrtc/v2"
@@ -15,14 +15,14 @@ import (
 // Transport is the WebRTC transport.
 type Transport struct {
 	webrtcOptions webrtc.Configuration
-	muxer         smux.Transport
+	muxer         smux.Multiplexer
 	localID       peer.ID
 	api           *webrtc.API
 }
 
 // NewTransport creates a WebRTC transport that signals over a direct HTTP connection.
 // It is currently required to provide a muxer.
-func NewTransport(webrtcOptions webrtc.Configuration, muxer smux.Transport) *Transport {
+func NewTransport(webrtcOptions webrtc.Configuration, muxer smux.Multiplexer) *Transport {
 	s := webrtc.SettingEngine{}
 	// Use Detach data channels mode
 	s.DetachDataChannels()
@@ -43,7 +43,7 @@ func (t *Transport) CanDial(addr ma.Multiaddr) bool {
 }
 
 // Dial dials the peer at the remote address.
-func (t *Transport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (tpt.Conn, error) {
+func (t *Transport) Dial(ctx context.Context, raddr ma.Multiaddr, p peer.ID) (tpt.CapableConn, error) {
 	if !t.CanDial(raddr) {
 		return nil, fmt.Errorf("can't dial address %s", raddr)
 	}

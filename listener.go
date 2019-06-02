@@ -7,7 +7,7 @@ import (
 	"net"
 	"net/http"
 
-	tpt "github.com/libp2p/go-libp2p-transport"
+	tpt "github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
 )
@@ -123,7 +123,7 @@ func (l *Listener) handleSignal(offerStr string) (string, error) {
 }
 
 // Accept waits for and returns the next connection to the listener.
-func (l *Listener) Accept() (tpt.Conn, error) {
+func (l *Listener) Accept() (tpt.CapableConn, error) {
 	conn, ok := <-l.accept
 	if !ok {
 		return nil, errors.New("Listener closed")

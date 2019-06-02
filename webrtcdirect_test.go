@@ -5,9 +5,9 @@ import (
 
 	logging "github.com/ipfs/go-log"
 
+	mplex "github.com/libp2p/go-libp2p-mplex"
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/pion/webrtc/v2"
-	mplex "github.com/whyrusleeping/go-smux-multiplex"
 )
 
 func TestTransport(t *testing.T) {
