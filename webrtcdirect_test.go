@@ -24,7 +24,7 @@ func TestTransport(t *testing.T) {
 
 	addr := "/ip4/127.0.0.1/tcp/0/http/p2p-webrtc-direct"
 
-	// TODO: Re-enable the entire test suite
+	// TODO: Re-enable normal test suite when not hitting CI limits when using race detector
 	// utils.SubtestTransport(t, ta, tb, addr, "peerA")
 	SubtestTransport(t, ta, tb, addr, "peerA")
 }
