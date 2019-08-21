@@ -21,8 +21,12 @@ type Listener struct {
 }
 
 func newListener(config *connConfig) (*Listener, error) {
+	lnet, lnaddr, err := manet.DialArgs(config.maAddr)
+	if err != nil {
+		return nil, err
+	}
 
-	ln, err := net.Listen(config.addr.Network(), config.addr.String())
+	ln, err := net.Listen(lnet, lnaddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to listen: %v", err)
 	}
