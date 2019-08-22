@@ -7,7 +7,8 @@ import (
 	"net"
 	"net/http"
 
-	tpt "github.com/libp2p/go-libp2p-core/transport"
+	peer "github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
 )
@@ -26,6 +27,7 @@ func newListener(config *connConfig) (*Listener, error) {
 		return nil, err
 	}
 
+	log.Debug("newListener %s : %s", lnet, lnaddr)
 	ln, err := net.Listen(lnet, lnaddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to listen: %v", err)
@@ -45,7 +47,7 @@ func newListener(config *connConfig) (*Listener, error) {
 
 	l := &Listener{
 		config: config,
-		accept: make(chan *Conn),
+		accept: make(chan *Conn, 1),
 	}
 
 	mux := http.NewServeMux()
@@ -56,6 +58,7 @@ func newListener(config *connConfig) (*Listener, error) {
 	}
 
 	go func() {
+		log.Debug("srv serving")
 		srvErr := srv.Serve(ln)
 		if srvErr != nil {
 			log.Warningf("failed to start server: %v", srvErr)
@@ -67,6 +70,7 @@ func newListener(config *connConfig) (*Listener, error) {
 }
 
 func (l *Listener) handler(w http.ResponseWriter, r *http.Request) {
+	log.Debugf("handler")
 	r.ParseForm()
 	signals, ok := r.Form["signal"]
 	if !ok || len(signals) != 1 {
@@ -90,6 +94,7 @@ func (l *Listener) handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (l *Listener) handleSignal(offerStr string) (string, error) {
+	log.Debugf("handle signal")
 	offer, err := decodeSignal(offerStr)
 	if err != nil {
 		return "", fmt.Errorf("failed to decode offer: %v", err)
@@ -120,20 +125,21 @@ func (l *Listener) handleSignal(offerStr string) (string, error) {
 		return "", fmt.Errorf("failed to encode answer: %v", err)
 	}
 
-	c := newConn(l.config, pc, nil)
+	c := newConn(l.config.CopyWithNewRemoteID(peer.ID(offer.SDP)), pc, nil)
 	l.accept <- c
-
+	log.Debug("signal handled")
 	return answerEnc, nil
 }
 
 // Accept waits for and returns the next connection to the listener.
-func (l *Listener) Accept() (tpt.CapableConn, error) {
+func (l *Listener) Accept() (transport.CapableConn, error) {
 	conn, ok := <-l.accept
 	if !ok {
 		return nil, errors.New("Listener closed")
 	}
+	log.Debugf("Accept filters: %v, addr: %s", l.config.transport.Upgrader, conn.RemoteMultiaddr())
 
-	return conn, nil
+	return l.config.transport.Upgrader.UpgradeInbound(context.Background(), l.config.transport, conn)
 }
 
 // Close closes the listener.

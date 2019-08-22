@@ -13,7 +13,6 @@ import (
 	"time"
 
 	ic "github.com/libp2p/go-libp2p-core/crypto"
-	smux "github.com/libp2p/go-libp2p-core/mux"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	tpt "github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
@@ -28,6 +27,16 @@ type connConfig struct {
 	addr      net.Addr
 	isServer  bool
 	remoteID  peer.ID
+}
+
+func (c *connConfig) CopyWithNewRemoteID(remoteID peer.ID) *connConfig {
+	return &connConfig{
+		transport: c.transport,
+		maAddr:    c.maAddr,
+		addr:      c.addr,
+		isServer:  c.isServer,
+		remoteID:  remoteID,
+	}
 }
 
 func newConnConfig(transport *Transport, maAddr ma.Multiaddr, isServer bool) (*connConfig, error) {
@@ -52,21 +61,25 @@ type Conn struct {
 	config *connConfig
 
 	peerConnection *webrtc.PeerConnection
-	initChannel    datachannel.ReadWriteCloser
+	channel        datachannel.ReadWriteCloser
 
-	lock      sync.RWMutex
-	accept    chan chan detachResult
-	isMuxed   bool
-	muxedConn smux.MuxedConn
+	lock   sync.RWMutex
+	accept chan chan detachResult
+	addr   net.Addr
+
+	buf      []byte
+	bufStart int
+	bufEnd   int
 }
 
 func newConn(config *connConfig, pc *webrtc.PeerConnection, initChannel datachannel.ReadWriteCloser) *Conn {
 	conn := &Conn{
 		config:         config,
 		peerConnection: pc,
-		initChannel:    initChannel,
+		channel:        initChannel,
 		accept:         make(chan chan detachResult),
-		isMuxed:        config.transport.muxer != nil,
+		buf:            make([]byte, dcWrapperBufSize),
+		addr:           config.addr,
 	}
 
 	pc.OnDataChannel(func(dc *webrtc.DataChannel) {
@@ -175,6 +188,10 @@ func (c *Conn) Close() error {
 
 	close(c.accept)
 
+	newErr := c.channel.Close()
+	if err == nil {
+		err = newErr
+	}
 	return err
 }
 
@@ -185,39 +202,6 @@ func (c *Conn) IsClosed() bool {
 	pc := c.peerConnection
 	c.lock.RUnlock()
 	return pc == nil
-}
-
-// OpenStream creates a new stream.
-func (c *Conn) OpenStream() (smux.MuxedStream, error) {
-	muxed, err := c.getMuxed()
-	if err != nil {
-		return nil, err
-	}
-	if muxed != nil {
-		return muxed.OpenStream()
-	}
-
-	rawDC := c.checkInitChannel()
-	if rawDC == nil {
-		pc, err := c.getPC()
-		if err != nil {
-			return nil, err
-		}
-		dc, err := pc.CreateDataChannel("data", nil)
-		if err != nil {
-			return nil, err
-		}
-
-		detachRes := detachChannel(dc)
-
-		res := <-detachRes
-		if res.err != nil {
-			return nil, res.err
-		}
-		rawDC = res.dc
-	}
-
-	return newStream(rawDC), nil
 }
 
 func (c *Conn) getPC() (*webrtc.PeerConnection, error) {
@@ -232,78 +216,60 @@ func (c *Conn) getPC() (*webrtc.PeerConnection, error) {
 	return pc, nil
 }
 
-func (c *Conn) getMuxed() (smux.MuxedConn, error) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+// func (c *Conn) getMuxed() (smux.MuxedConn, error) {
+// 	c.lock.Lock()
+// 	defer c.lock.Unlock()
 
-	if !c.isMuxed {
-		return nil, nil
-	}
+// 	if !c.isMuxed {
+// 		return nil, nil
+// 	}
 
-	if c.muxedConn != nil {
-		return c.muxedConn, nil
-	}
+// 	if c.muxedConn != nil {
+// 		return c.muxedConn, nil
+// 	}
 
-	rawDC := c.initChannel
-	if rawDC == nil {
-		var err error
-		rawDC, err = c.awaitAccept()
-		if err != nil {
-			return nil, err
-		}
-	}
+// 	rawDC := c.initChannel
+// 	if rawDC == nil {
+// 		var err error
+// 		rawDC, err = c.awaitAccept()
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 	}
 
-	err := c.useMuxer(&dcWrapper{channel: rawDC, addr: c.config.addr, buf: make([]byte, dcWrapperBufSize)}, c.config.transport.muxer)
-	if err != nil {
-		return nil, err
-	}
+// 	err := c.useMuxer(&dcWrapper{channel: rawDC, addr: c.config.addr, buf: make([]byte, dcWrapperBufSize)}, c.config.transport.muxer)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return c.muxedConn, nil
-}
+// 	return c.muxedConn, nil
+// }
 
 // Note: caller should hold the conn lock.
-func (c *Conn) useMuxer(conn net.Conn, muxer smux.Multiplexer) error {
-	muxed, err := muxer.NewConn(conn, c.config.isServer)
-	if err != nil {
-		return err
-	}
-	c.muxedConn = muxed
+// func (c *Conn) useMuxer(conn net.Conn, muxer smux.Multiplexer) error {
+// 	muxed, err := muxer.NewConn(conn, c.config.isServer)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	c.muxedConn = muxed
 
-	return nil
-}
+// 	return nil
+// }
 
-func (c *Conn) checkInitChannel() datachannel.ReadWriteCloser {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	// Since a WebRTC offer can't be empty the offering side will have
-	// an initial data channel opened. We return it here, the first time
-	// OpenStream is called.
-	if c.initChannel != nil {
-		ch := c.initChannel
-		c.initChannel = nil
-		return ch
-	}
+// func (c *Conn) checkInitChannel() datachannel.ReadWriteCloser {
+// 	c.lock.Lock()
+// 	defer c.lock.Unlock()
+// 	// Since a WebRTC offer can't be empty the offering side will have
+// 	// an initial data channel opened. We return it here, the first time
+// 	// OpenStream is called.
+// 	if c.initChannel != nil {
+// 		ch := c.initChannel
+// 		c.initChannel = nil
+// 		return ch
+// 	}
 
-	return nil
-}
-
-// AcceptStream accepts a stream opened by the other side.
-func (c *Conn) AcceptStream() (smux.MuxedStream, error) {
-	muxed, err := c.getMuxed()
-	if err != nil {
-		return nil, err
-	}
-	if muxed != nil {
-		return muxed.AcceptStream()
-	}
-
-	rawDC := c.checkInitChannel()
-	if rawDC == nil {
-		rawDC, err = c.awaitAccept()
-	}
-
-	return newStream(rawDC), nil
-}
+// 	return nil
+// }
 
 func (c *Conn) awaitAccept() (datachannel.ReadWriteCloser, error) {
 	detachRes, ok := <-c.accept
@@ -312,11 +278,15 @@ func (c *Conn) awaitAccept() (datachannel.ReadWriteCloser, error) {
 	}
 
 	res := <-detachRes
+	if res.err == nil {
+		c.channel = res.dc
+	}
 	return res.dc, res.err
 }
 
 // LocalPeer returns our peer ID
 func (c *Conn) LocalPeer() peer.ID {
+	log.Debugf("local peer called, returning: %s", c.config.transport.localID)
 	// TODO: Base on WebRTC security?
 	return c.config.transport.localID
 }
@@ -330,6 +300,7 @@ func (c *Conn) LocalPrivateKey() ic.PrivKey {
 
 // RemotePeer returns the peer ID of the remote peer.
 func (c *Conn) RemotePeer() peer.ID {
+	log.Debugf("conn remote peer: %s", c.config.remoteID)
 	// TODO: Base on WebRTC security?
 	return c.config.remoteID
 }
@@ -349,6 +320,7 @@ func (c *Conn) LocalMultiaddr() ma.Multiaddr {
 // RemoteMultiaddr returns the remote Multiaddr associated
 // with this connection
 func (c *Conn) RemoteMultiaddr() ma.Multiaddr {
+	log.Debugf("remote maddr: ", c.config.maAddr.String())
 	return c.config.maAddr
 }
 
@@ -362,65 +334,78 @@ func (c *Conn) Transport() tpt.Transport {
 const dcWrapperBufSize = math.MaxUint16
 
 // dcWrapper wraps datachannel.ReadWriteCloser to form a net.Conn
-type dcWrapper struct {
-	channel datachannel.ReadWriteCloser
-	addr    net.Addr
+// type dcWrapper struct {
+// 	channel datachannel.ReadWriteCloser
+// 	addr    net.Addr
 
-	buf      []byte
-	bufStart int
-	bufEnd   int
-}
+// 	buf      []byte
+// 	bufStart int
+// 	bufEnd   int
+// }
 
-func (w *dcWrapper) Read(p []byte) (int, error) {
+func (c *Conn) Read(p []byte) (int, error) {
+	if c.channel == nil {
+		c.awaitAccept()
+	}
 	var err error
 
-	if w.bufEnd == 0 {
+	if c.bufEnd == 0 {
 		n := 0
-		n, err = w.channel.Read(w.buf)
-		w.bufEnd = n
+		n, err = c.channel.Read(c.buf)
+		c.bufEnd = n
 	}
 
 	n := 0
-	if w.bufEnd-w.bufStart > 0 {
-		n = copy(p, w.buf[w.bufStart:w.bufEnd])
-		w.bufStart += n
+	if c.bufEnd-c.bufStart > 0 {
+		n = copy(p, c.buf[c.bufStart:c.bufEnd])
+		c.bufStart += n
 
-		if w.bufStart >= w.bufEnd {
-			w.bufStart = 0
-			w.bufEnd = 0
+		if c.bufStart >= c.bufEnd {
+			c.bufStart = 0
+			c.bufEnd = 0
 		}
 	}
+	log.Debugf("read finished: %s", string(p))
 
 	return n, err
 }
 
-func (w *dcWrapper) Write(p []byte) (n int, err error) {
-	if len(p) > dcWrapperBufSize {
-		return w.channel.Write(p[:dcWrapperBufSize])
+func (c *Conn) Write(p []byte) (n int, err error) {
+	if c.channel == nil {
+		log.Debugf("awaiting accept")
+		_, err := c.awaitAccept()
+		if err != nil {
+			return 0, fmt.Errorf("error awaiting accept: %v", err)
+		}
 	}
-	return w.channel.Write(p)
+	if len(p) > dcWrapperBufSize {
+		log.Debugf("write: %v", p[:dcWrapperBufSize])
+		return c.channel.Write(p[:dcWrapperBufSize])
+	}
+	log.Debugf("write: (%v) %s", p, string(p))
+	num, err := c.channel.Write(p)
+	if err != nil {
+		log.Errorf("error writing: %v", err)
+	}
+	return num, err
 }
 
-func (w *dcWrapper) Close() error {
-	return w.channel.Close()
+func (c *Conn) LocalAddr() net.Addr {
+	return c.addr
 }
 
-func (w *dcWrapper) LocalAddr() net.Addr {
-	return w.addr
+func (c *Conn) RemoteAddr() net.Addr {
+	return c.addr
 }
 
-func (w *dcWrapper) RemoteAddr() net.Addr {
-	return w.addr
-}
-
-func (w *dcWrapper) SetDeadline(t time.Time) error {
+func (c *Conn) SetDeadline(t time.Time) error {
 	return nil
 }
 
-func (w *dcWrapper) SetReadDeadline(t time.Time) error {
+func (c *Conn) SetReadDeadline(t time.Time) error {
 	return nil
 }
 
-func (w *dcWrapper) SetWriteDeadline(t time.Time) error {
+func (c *Conn) SetWriteDeadline(t time.Time) error {
 	return nil
 }
