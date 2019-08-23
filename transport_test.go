@@ -25,16 +25,16 @@ func SubtestTransport(t *testing.T, ta, tb tpt.Transport, addr string, peerA pee
 	subtests := []func(t *testing.T, ta, tb tpt.Transport, maddr ma.Multiaddr, peerA peer.ID){}
 
 	if detectrace.WithRace() {
-		subtests = []func(t *testing.T, ta, tb tpt.Transport, maddr ma.Multiaddr, peerA peer.ID){
-			ttransport.SubtestProtocols,
-			ttransport.SubtestBasic,
+		// subtests = []func(t *testing.T, ta, tb tpt.Transport, maddr ma.Multiaddr, peerA peer.ID){
+		// 	ttransport.SubtestProtocols,
+		// 	ttransport.SubtestBasic,
 
-			ttransport.SubtestCancel,
-			ttransport.SubtestPingPong,
+		// 	ttransport.SubtestCancel,
+		// 	ttransport.SubtestPingPong,
 
-			// Stolen from the stream muxer test suite.
-			ttransport.SubtestStress1Conn1Stream1Msg,
-		}
+		// 	// Stolen from the stream muxer test suite.
+		// 	ttransport.SubtestStress1Conn1Stream1Msg,
+		// }
 	} else {
 		subtests = []func(t *testing.T, ta, tb tpt.Transport, maddr ma.Multiaddr, peerA peer.ID){
 			ttransport.SubtestStress1Conn1Stream100Msg,

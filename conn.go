@@ -186,8 +186,6 @@ func (c *Conn) Close() error {
 	}
 	c.peerConnection = nil
 
-	close(c.accept)
-
 	newErr := c.channel.Close()
 	if err == nil {
 		err = newErr
@@ -216,72 +214,24 @@ func (c *Conn) getPC() (*webrtc.PeerConnection, error) {
 	return pc, nil
 }
 
-// func (c *Conn) getMuxed() (smux.MuxedConn, error) {
-// 	c.lock.Lock()
-// 	defer c.lock.Unlock()
-
-// 	if !c.isMuxed {
-// 		return nil, nil
-// 	}
-
-// 	if c.muxedConn != nil {
-// 		return c.muxedConn, nil
-// 	}
-
-// 	rawDC := c.initChannel
-// 	if rawDC == nil {
-// 		var err error
-// 		rawDC, err = c.awaitAccept()
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
-
-// 	err := c.useMuxer(&dcWrapper{channel: rawDC, addr: c.config.addr, buf: make([]byte, dcWrapperBufSize)}, c.config.transport.muxer)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return c.muxedConn, nil
-// }
-
-// Note: caller should hold the conn lock.
-// func (c *Conn) useMuxer(conn net.Conn, muxer smux.Multiplexer) error {
-// 	muxed, err := muxer.NewConn(conn, c.config.isServer)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	c.muxedConn = muxed
-
-// 	return nil
-// }
-
-// func (c *Conn) checkInitChannel() datachannel.ReadWriteCloser {
-// 	c.lock.Lock()
-// 	defer c.lock.Unlock()
-// 	// Since a WebRTC offer can't be empty the offering side will have
-// 	// an initial data channel opened. We return it here, the first time
-// 	// OpenStream is called.
-// 	if c.initChannel != nil {
-// 		ch := c.initChannel
-// 		c.initChannel = nil
-// 		return ch
-// 	}
-
-// 	return nil
-// }
-
-func (c *Conn) awaitAccept() (datachannel.ReadWriteCloser, error) {
+func (c *Conn) awaitAccept(timeout time.Duration) error {
+	timer := time.NewTimer(timeout)
+	defer timer.Stop()
 	detachRes, ok := <-c.accept
 	if !ok {
-		return nil, errors.New("Conn closed")
+		return errors.New("Conn closed")
 	}
 
-	res := <-detachRes
-	if res.err == nil {
-		c.channel = res.dc
+	select {
+	case res := <-detachRes:
+		if res.err == nil {
+			c.channel = res.dc
+		}
+		return res.err
+	case <-timer.C:
+		return errors.New("timeout awaiting webrtc accept")
 	}
-	return res.dc, res.err
+	return fmt.Errorf("awaitAccept errored in a strange way and skipped a select")
 }
 
 // LocalPeer returns our peer ID
@@ -333,19 +283,9 @@ func (c *Conn) Transport() tpt.Transport {
 // packetizing strategy.
 const dcWrapperBufSize = math.MaxUint16
 
-// dcWrapper wraps datachannel.ReadWriteCloser to form a net.Conn
-// type dcWrapper struct {
-// 	channel datachannel.ReadWriteCloser
-// 	addr    net.Addr
-
-// 	buf      []byte
-// 	bufStart int
-// 	bufEnd   int
-// }
-
 func (c *Conn) Read(p []byte) (int, error) {
 	if c.channel == nil {
-		c.awaitAccept()
+		return 0, errors.New("channel is not open")
 	}
 	var err error
 
@@ -365,24 +305,17 @@ func (c *Conn) Read(p []byte) (int, error) {
 			c.bufEnd = 0
 		}
 	}
-	log.Debugf("read finished: %s", string(p))
 
 	return n, err
 }
 
 func (c *Conn) Write(p []byte) (n int, err error) {
 	if c.channel == nil {
-		log.Debugf("awaiting accept")
-		_, err := c.awaitAccept()
-		if err != nil {
-			return 0, fmt.Errorf("error awaiting accept: %v", err)
-		}
+		return 0, errors.New("channel is not open")
 	}
 	if len(p) > dcWrapperBufSize {
-		log.Debugf("write: %v", p[:dcWrapperBufSize])
 		return c.channel.Write(p[:dcWrapperBufSize])
 	}
-	log.Debugf("write: (%v) %s", p, string(p))
 	num, err := c.channel.Write(p)
 	if err != nil {
 		log.Errorf("error writing: %v", err)

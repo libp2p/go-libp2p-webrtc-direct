@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	smux "github.com/libp2p/go-libp2p-core/mux"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/transport"
 	tptu "github.com/libp2p/go-libp2p-transport-upgrader"
@@ -21,32 +20,22 @@ type Transport struct {
 	Upgrader      *tptu.Upgrader
 }
 
-func NewWebRtcTransport(upgrader *tptu.Upgrader) *Transport {
+func NewTransport(upgrader *tptu.Upgrader) *Transport {
 	s := webrtc.SettingEngine{}
 	// Use Detach data channels mode
 	s.DetachDataChannels()
 
 	api := webrtc.NewAPI(webrtc.WithSettingEngine(s))
+
+	if upgrader == nil {
+		return nil
+	}
+
 	return &Transport{
 		webrtcOptions: webrtc.Configuration{},
 		localID:       peer.ID(1),
 		api:           api,
 		Upgrader:      upgrader,
-	}
-}
-
-// NewTransport creates a WebRTC transport that signals over a direct HTTP connection.
-// It is currently required to provide a muxer.
-func NewTransport(webrtcOptions webrtc.Configuration, muxer smux.Multiplexer) *Transport {
-	s := webrtc.SettingEngine{}
-	// Use Detach data channels mode
-	s.DetachDataChannels()
-
-	api := webrtc.NewAPI(webrtc.WithSettingEngine(s))
-	return &Transport{
-		webrtcOptions: webrtcOptions,
-		localID:       peer.ID(1),
-		api:           api,
 	}
 }
 

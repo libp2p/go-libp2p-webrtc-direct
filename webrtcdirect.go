@@ -18,7 +18,4 @@ var httpma, _ = ma.NewMultiaddr("/http")
 
 var _ tpt.Transport = &Transport{}
 
-// var _ tpt.CapableConn = &Conn{}
-// var _ tpt.Listener = &Listener{}
-
 var _ smux.MuxedStream = &Stream{}

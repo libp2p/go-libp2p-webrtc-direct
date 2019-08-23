@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/transport"
@@ -27,7 +28,6 @@ func newListener(config *connConfig) (*Listener, error) {
 		return nil, err
 	}
 
-	log.Debug("newListener %s : %s", lnet, lnaddr)
 	ln, err := net.Listen(lnet, lnaddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to listen: %v", err)
@@ -126,7 +126,14 @@ func (l *Listener) handleSignal(offerStr string) (string, error) {
 	}
 
 	c := newConn(l.config.CopyWithNewRemoteID(peer.ID(offer.SDP)), pc, nil)
-	l.accept <- c
+	go func() {
+		err := c.awaitAccept(30 * time.Second)
+		if err != nil {
+			log.Warningf("error awaiting channel accept: %v", err)
+			return
+		}
+		l.accept <- c
+	}()
 	log.Debug("signal handled")
 	return answerEnc, nil
 }
@@ -137,7 +144,6 @@ func (l *Listener) Accept() (transport.CapableConn, error) {
 	if !ok {
 		return nil, errors.New("Listener closed")
 	}
-	log.Debugf("Accept filters: %v, addr: %s", l.config.transport.Upgrader, conn.RemoteMultiaddr())
 
 	return l.config.transport.Upgrader.UpgradeInbound(context.Background(), l.config.transport, conn)
 }
