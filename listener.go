@@ -151,10 +151,14 @@ func (l *Listener) Accept() (transport.CapableConn, error) {
 // Close closes the listener.
 // Any blocked Accept operations will be unblocked and return errors.
 func (l *Listener) Close() error {
+	if l.srv == nil {
+		return nil // don't close twice
+	}
 	err := l.srv.Shutdown(context.Background())
 	if err != nil {
 		return err
 	}
+	l.srv = nil
 
 	close(l.accept)
 
