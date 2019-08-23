@@ -9,11 +9,13 @@ import (
 
 var log = logging.Logger("webrtcdirect-tpt")
 
+func init() {
+	log.Debug("hello!")
+}
+
 var webrtcma, _ = ma.NewMultiaddr("/p2p-webrtc-direct")
 var httpma, _ = ma.NewMultiaddr("/http")
 
 var _ tpt.Transport = &Transport{}
-var _ tpt.CapableConn = &Conn{}
-var _ tpt.Listener = &Listener{}
 
 var _ smux.MuxedStream = &Stream{}

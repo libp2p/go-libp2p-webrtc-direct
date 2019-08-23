@@ -1,48 +1,49 @@
 package libp2pwebrtcdirect
 
 import (
+	"crypto/rand"
 	"testing"
 
-	logging "github.com/ipfs/go-log"
-
+	libp2pcrypto "github.com/libp2p/go-libp2p-core/crypto"
 	mplex "github.com/libp2p/go-libp2p-mplex"
-	ma "github.com/multiformats/go-multiaddr"
-	"github.com/pion/webrtc/v2"
+	peer "github.com/libp2p/go-libp2p-peer"
+	secio "github.com/libp2p/go-libp2p-secio"
+
+	logging "github.com/ipfs/go-log"
+	tptu "github.com/libp2p/go-libp2p-transport-upgrader"
 )
 
-func TestTransport(t *testing.T) {
-	logging.SetLogLevel("*", "warning")
+func newUpgrader(t *testing.T) (*tptu.Upgrader, libp2pcrypto.PrivKey) {
+	keyPriv, _, err := libp2pcrypto.GenerateSecp256k1Key(rand.Reader)
+	if err != nil {
+		t.Fatalf("error creating key: %v", err)
+	}
+	secTransp, err := secio.New(keyPriv)
+	if err != nil {
+		t.Fatalf("error creating secio transport: %v", err)
+	}
+	return &tptu.Upgrader{
+		Muxer:  mplex.DefaultTransport,
+		Secure: secTransp,
+	}, keyPriv
+}
 
-	ta := NewTransport(
-		webrtc.Configuration{},
-		new(mplex.Transport),
-	)
-	tb := NewTransport(
-		webrtc.Configuration{},
-		new(mplex.Transport),
-	)
+func TestTransport(t *testing.T) {
+	logging.SetLogLevel("*", "debug")
+	aUpgrade, aKey := newUpgrader(t)
+	bUpgrade, _ := newUpgrader(t)
+
+	aId, err := peer.IDFromPublicKey(aKey.GetPublic())
+	if err != nil {
+		t.Fatalf("error getting id: %v", err)
+	}
+
+	ta := NewTransport(aUpgrade)
+	tb := NewTransport(bUpgrade)
 
 	addr := "/ip4/127.0.0.1/tcp/0/http/p2p-webrtc-direct"
 
 	// TODO: Re-enable normal test suite when not hitting CI limits when using race detector
 	// utils.SubtestTransport(t, ta, tb, addr, "peerA")
-	SubtestTransport(t, ta, tb, addr, "peerA")
-}
-
-func TestTransportCantListenUtp(t *testing.T) {
-	utpa, err := ma.NewMultiaddr("/ip4/127.0.0.1/tcp/50000")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	tpt := NewTransport(
-		webrtc.Configuration{},
-		new(mplex.Transport),
-	)
-
-	_, err = tpt.Listen(utpa)
-	if err == nil {
-		t.Fatal("shouldnt be able to listen on utp addr with tcp transport")
-	}
-
+	SubtestTransport(t, ta, tb, addr, aId)
 }
