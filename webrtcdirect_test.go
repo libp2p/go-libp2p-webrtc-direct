@@ -6,6 +6,7 @@ import (
 	logging "github.com/ipfs/go-log"
 
 	mplex "github.com/libp2p/go-libp2p-mplex"
+	utils "github.com/libp2p/go-libp2p-testing/suites/transport"
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/pion/webrtc/v2"
 )
@@ -24,9 +25,7 @@ func TestTransport(t *testing.T) {
 
 	addr := "/ip4/127.0.0.1/tcp/0/http/p2p-webrtc-direct"
 
-	// TODO: Re-enable normal test suite when not hitting CI limits when using race detector
-	// utils.SubtestTransport(t, ta, tb, addr, "peerA")
-	SubtestTransport(t, ta, tb, addr, "peerA")
+	utils.SubtestTransport(t, ta, tb, addr, "peerA")
 }
 
 func TestTransportCantListenUtp(t *testing.T) {
