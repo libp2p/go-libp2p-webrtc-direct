@@ -7,6 +7,9 @@ go:
   - 1.13.x
 
 env:
+  global:
+    - PIONS_LOG_WARN=all
+    - PIONS_LOG_ERROR=all
   matrix:
     - BUILD_DEPTYPE=gomod
 

@@ -11,6 +11,6 @@ require (
 	github.com/multiformats/go-multiaddr-fmt v0.1.0
 	github.com/multiformats/go-multiaddr-net v0.1.1
 	github.com/multiformats/go-multibase v0.0.1
-	github.com/pion/datachannel v1.4.13
-	github.com/pion/webrtc/v2 v2.1.18
+	github.com/pion/datachannel v1.4.16
+	github.com/pion/webrtc/v2 v2.2.4
 )
