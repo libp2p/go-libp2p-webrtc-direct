@@ -31,7 +31,7 @@ func NewTransport(webrtcOptions webrtc.Configuration, muxer smux.Multiplexer) *T
 	return &Transport{
 		webrtcOptions: webrtcOptions,
 		muxer:         muxer, // TODO: Make the muxer optional
-		localID:       peer.ID(1),
+		localID:       peer.ID("1"),
 		api:           api,
 	}
 }
