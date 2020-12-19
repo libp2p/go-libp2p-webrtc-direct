@@ -32,12 +32,27 @@ func (s *Stream) Write(p []byte) (int, error) {
 	return s.channel.Write(p)
 }
 
+// CloseRead closes the stream for writing. Reading will still work (that
+// is, the remote side can still write).
+func (s *Stream) CloseRead() error {
+	// TODO: figure out close vs reset
+	return nil
+}
+
+// CloseWrite closes the stream for writing. Reading will still work (that
+// is, the remote side can still write).
+func (s *Stream) CloseWrite() error {
+	// TODO: figure out close vs reset
+	return nil
+}
+
 // Close closes the stream for writing. Reading will still work (that
 // is, the remote side can still write).
 func (s *Stream) Close() error {
 	// TODO: figure out close vs reset
 	return nil
 }
+
 
 // Reset closes both ends of the stream. Use this to tell the remote
 // side to hang up and go away.
