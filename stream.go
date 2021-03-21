@@ -53,7 +53,6 @@ func (s *Stream) Close() error {
 	return nil
 }
 
-
 // Reset closes both ends of the stream. Use this to tell the remote
 // side to hang up and go away.
 func (s *Stream) Reset() error {

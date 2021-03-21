@@ -10,7 +10,7 @@ import (
 	mplex "github.com/libp2p/go-libp2p-mplex"
 	direct "github.com/libp2p/go-libp2p-webrtc-direct"
 	ma "github.com/multiformats/go-multiaddr"
-	"github.com/pion/webrtc/v2"
+	"github.com/pion/webrtc/v3"
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 	defer c.Close()
 	fmt.Println("[dialer] Opened connection")
 
-	s, err := c.OpenStream()
+	s, err := c.OpenStream(context.Background())
 	check(err)
 	fmt.Println("[dialer] Opened stream")
 
