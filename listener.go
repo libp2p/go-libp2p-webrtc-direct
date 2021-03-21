@@ -10,6 +10,7 @@ import (
 	tpt "github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
+	"github.com/pion/webrtc/v3"
 )
 
 // Listener is an interface closely resembling the net.Listener interface.
@@ -110,12 +111,15 @@ func (l *Listener) handleSignal(offerStr string) (string, error) {
 		return "", fmt.Errorf("failed to create answer: %v", err)
 	}
 
+	// Complete ICE Gathering for single-shot signaling.
+	gatherComplete := webrtc.GatheringCompletePromise(pc)
 	err = pc.SetLocalDescription(answer)
 	if err != nil {
 		return "", fmt.Errorf("failed to set local description: %v", err)
 	}
+	<-gatherComplete
 
-	answerEnc, err := encodeSignal(answer)
+	answerEnc, err := encodeSignal(*pc.LocalDescription())
 	if err != nil {
 		return "", fmt.Errorf("failed to encode answer: %v", err)
 	}

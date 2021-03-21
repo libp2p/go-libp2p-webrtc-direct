@@ -97,12 +97,15 @@ func dial(ctx context.Context, config *connConfig) (*Conn, error) {
 		return nil, err
 	}
 
+	// Complete ICE Gathering for single-shot signaling.
+	gatherComplete := webrtc.GatheringCompletePromise(pc)
 	err = pc.SetLocalDescription(offer)
 	if err != nil {
 		return nil, err
 	}
+	<-gatherComplete
 
-	offerEnc, err := encodeSignal(offer)
+	offerEnc, err := encodeSignal(*pc.LocalDescription())
 	if err != nil {
 		return nil, err
 	}
