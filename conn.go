@@ -19,7 +19,7 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
 	"github.com/pion/datachannel"
-	"github.com/pion/webrtc/v2"
+	"github.com/pion/webrtc/v3"
 )
 
 type connConfig struct {
@@ -188,13 +188,13 @@ func (c *Conn) IsClosed() bool {
 }
 
 // OpenStream creates a new stream.
-func (c *Conn) OpenStream() (smux.MuxedStream, error) {
+func (c *Conn) OpenStream(ctx context.Context) (smux.MuxedStream, error) {
 	muxed, err := c.getMuxed()
 	if err != nil {
 		return nil, err
 	}
 	if muxed != nil {
-		return muxed.OpenStream()
+		return muxed.OpenStream(ctx)
 	}
 
 	rawDC := c.checkInitChannel()
