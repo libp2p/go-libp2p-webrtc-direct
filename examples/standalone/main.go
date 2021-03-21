@@ -4,14 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
-
 	smux "github.com/libp2p/go-libp2p-core/mux"
 	tpt "github.com/libp2p/go-libp2p-core/transport"
 	mplex "github.com/libp2p/go-libp2p-mplex"
 	direct "github.com/libp2p/go-libp2p-webrtc-direct"
 	ma "github.com/multiformats/go-multiaddr"
-	"github.com/pion/webrtc/v2"
+	"github.com/pion/webrtc/v3"
+	"io/ioutil"
 )
 
 const listenFlag = "listen"
@@ -51,7 +50,7 @@ func main() {
 		defer c.Close()
 		fmt.Println("[dialer] Opened connection")
 
-		s, err := c.OpenStream()
+		s, err := c.OpenStream(context.Background())
 		check(err)
 		fmt.Println("[dialer] Opened stream")
 
