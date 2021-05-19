@@ -9,7 +9,7 @@ import (
 
 	tpt "github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
-	manet "github.com/multiformats/go-multiaddr-net"
+	manet "github.com/multiformats/go-multiaddr/net"
 	"github.com/pion/webrtc/v3"
 )
 
@@ -59,7 +59,7 @@ func newListener(config *connConfig) (*Listener, error) {
 	go func() {
 		srvErr := srv.Serve(ln)
 		if srvErr != nil {
-			log.Warningf("failed to start server: %v", srvErr)
+			log.Warnf("failed to start server: %v", srvErr)
 		}
 	}()
 
@@ -71,13 +71,13 @@ func (l *Listener) handler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	signals, ok := r.Form["signal"]
 	if !ok || len(signals) != 1 {
-		log.Warningf("failed to handle request: failed to parse signal")
+		log.Warnf("failed to handle request: failed to parse signal")
 		return
 	}
 
 	answer, err := l.handleSignal(signals[0])
 	if err != nil {
-		log.Warningf("failed to handle request: failed to setup connection: %v", err)
+		log.Warnf("failed to handle request: failed to setup connection: %v", err)
 		return
 	}
 
@@ -85,7 +85,7 @@ func (l *Listener) handler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = fmt.Fprint(w, answer)
 	if err != nil {
-		log.Warningf("failed to handle request: failed to send answer: %v", err)
+		log.Warnf("failed to handle request: failed to send answer: %v", err)
 		return
 	}
 }

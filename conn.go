@@ -17,7 +17,7 @@ import (
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	tpt "github.com/libp2p/go-libp2p-core/transport"
 	ma "github.com/multiformats/go-multiaddr"
-	manet "github.com/multiformats/go-multiaddr-net"
+	manet "github.com/multiformats/go-multiaddr/net"
 	"github.com/pion/datachannel"
 	"github.com/pion/webrtc/v3"
 )
@@ -303,6 +303,9 @@ func (c *Conn) AcceptStream() (smux.MuxedStream, error) {
 	rawDC := c.checkInitChannel()
 	if rawDC == nil {
 		rawDC, err = c.awaitAccept()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return newStream(rawDC), nil
