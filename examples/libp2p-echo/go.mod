@@ -1,6 +1,6 @@
 module github.com/libp2p/go-libp2p-webrtc-direct/examples/libp2p-echo
 
-go 1.12
+go 1.16
 
 replace github.com/libp2p/go-libp2p-webrtc-direct => ../../
 
