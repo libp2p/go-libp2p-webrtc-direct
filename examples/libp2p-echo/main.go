@@ -138,7 +138,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	peerid, err := peer.IDB58Decode(pid)
+	peerid, err := peer.Decode(pid)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -146,7 +146,7 @@ func main() {
 	// Decapsulate the /ipfs/<peerID> part from the target
 	// /ip4/<a.b.c.d>/ipfs/<peer> becomes /ip4/<a.b.c.d>
 	targetPeerAddr, _ := ma.NewMultiaddr(
-		fmt.Sprintf("/ipfs/%s", peer.IDB58Encode(peerid)))
+		fmt.Sprintf("/ipfs/%s", peer.Encode(peerid)))
 	targetAddr := ipfsaddr.Decapsulate(targetPeerAddr)
 
 	// We have a peer ID and a targetAddr so we add it to the peerstore

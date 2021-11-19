@@ -3,10 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 
-	smux "github.com/libp2p/go-libp2p-core/mux"
-	tpt "github.com/libp2p/go-libp2p-core/transport"
 	mplex "github.com/libp2p/go-libp2p-mplex"
 	direct "github.com/libp2p/go-libp2p-webrtc-direct"
 	ma "github.com/multiformats/go-multiaddr"
@@ -39,24 +36,6 @@ func main() {
 
 	err = s.Close()
 	check(err)
-}
-
-func handleConn(c tpt.CapableConn) {
-	for {
-		s, err := c.AcceptStream()
-		if err != nil {
-			return
-		}
-
-		fmt.Println("[listener] Got stream")
-		go handleStream(s)
-	}
-}
-func handleStream(s smux.MuxedStream) {
-	b, err := ioutil.ReadAll(s)
-	check(err)
-	fmt.Println("[listener] Received:")
-	fmt.Println(string(b))
 }
 
 func check(err error) {
