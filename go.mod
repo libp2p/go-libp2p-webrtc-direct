@@ -1,6 +1,6 @@
 module github.com/libp2p/go-libp2p-webrtc-direct
 
-go 1.17
+go 1.18
 
 require (
 	github.com/ipfs/go-log v1.0.5
