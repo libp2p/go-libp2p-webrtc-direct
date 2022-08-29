@@ -4,13 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
+
 	smux "github.com/libp2p/go-libp2p-core/mux"
 	tpt "github.com/libp2p/go-libp2p-core/transport"
 	mplex "github.com/libp2p/go-libp2p-mplex"
 	direct "github.com/libp2p/go-libp2p-webrtc-direct"
 	ma "github.com/multiformats/go-multiaddr"
 	"github.com/pion/webrtc/v3"
-	"io/ioutil"
 )
 
 const listenFlag = "listen"
@@ -74,7 +75,7 @@ func handleConn(c tpt.CapableConn) {
 	}
 }
 func handleStream(s smux.MuxedStream) {
-	b, err := ioutil.ReadAll(s)
+	b, err := io.ReadAll(s)
 	check(err)
 	fmt.Println("[listener] Received:")
 	fmt.Println(string(b))
