@@ -1,6 +1,6 @@
 module github.com/libp2p/go-libp2p-webrtc-direct/examples/standalone
 
-go 1.17
+go 1.18
 
 replace github.com/libp2p/go-libp2p-webrtc-direct => ../../
 
