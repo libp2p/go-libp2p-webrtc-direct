@@ -1,8 +1,9 @@
 package libp2pwebrtcdirect
 
 import (
-	"github.com/pion/webrtc/v3"
 	"testing"
+
+	"github.com/pion/webrtc/v3"
 
 	logging "github.com/ipfs/go-log"
 

@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	mrand "math/rand"
 
@@ -167,7 +166,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	out, err := ioutil.ReadAll(s)
+	out, err := io.ReadAll(s)
 	if err != nil {
 		log.Fatalln(err)
 	}

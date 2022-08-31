@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"net"
 	"net/http"
@@ -124,7 +123,7 @@ func dial(ctx context.Context, config *connConfig) (*Conn, error) {
 	}
 	defer resp.Body.Close()
 
-	answerEnc, err := ioutil.ReadAll(resp.Body)
+	answerEnc, err := io.ReadAll(resp.Body)
 	if err != nil && err != io.EOF {
 		return nil, err
 	}
