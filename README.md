@@ -1,3 +1,21 @@
+# ⚠️⚠️⚠️⚠️⚠️⚠️
+**Status:**
+
+[Archived](https://github.com/libp2p/github-mgmt/pull/74) and not maintained
+
+**Alternatives:**
+
+WebRTC Browser-to-Server is being implemented in go-libp2p here https://github.com/libp2p/specs/pull/412 per the specification: https://github.com/libp2p/specs/pull/412
+
+WebRTC Browser-to-Browser is being tracked here: https://github.com/libp2p/specs/issues/475
+
+**Questions:**
+
+Please direct any questions about the specification to: https://github.com/libp2p/specs/issues
+
+Please direct any questions about the go-libp2p WebRTC implementation to: https://github.com/libp2p/go-libp2p/issues
+# ⚠️⚠️⚠️⚠️⚠️⚠️
+
 # go-libp2p-webrtc-direct
 
 [![](https://img.shields.io/badge/project-libp2p-yellow.svg?style=flat-square)](http://github.com/libp2p/libp2p)
@@ -12,8 +30,6 @@ Status](https://travis-ci.org/libp2p/go-libp2p-webrtc-direct.svg?branch=master)]
 > communication over WebRTC without requiring signalling servers. This is the
 > Go counterpart to
 > [js-libp2p-webrtc-direct](https://github.com/libp2p/js-libp2p-webrtc-direct).
-
-⚠️ Status: Alpha. ⚠️ 
 
 Lead maintainer: [@backkem](https://github.com/backkem)
 
